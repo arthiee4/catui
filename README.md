@@ -4,7 +4,7 @@
 
 # CATui: Emulation Frontend
 
-CATui is an emulation frontend built with the **Godot Engine**. It utilizes Libretro-based cores and runs all emulators within a single process, featuring social integration. This repository contains the source code for the client application.
+CATui is an emulation frontend built with the **Godot Engine 4.5.1**. It utilizes Libretro-based cores and runs all emulators within a single process, featuring social integration. This repository contains the source code for the client application.
 
 > Status: **developer alpha** - structure and code are subject to frequent changes.
 > 
