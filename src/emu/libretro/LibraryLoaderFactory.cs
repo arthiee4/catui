@@ -21,29 +21,23 @@ public static class LibraryLoaderFactory
 				GD.Print("[LibraryLoaderFactory] Using Windows library loader");
 				break;
 
-			case "Android":
-				_instance = new AndroidLibraryLoader();
-				GD.Print("[LibraryLoaderFactory] Using Android library loader");
-				break;
+			// not implemented
+			//case "Android":
+				//_instance = new AndroidLibraryLoader();
+				//GD.Print("[LibraryLoaderFactory] Using Android library loader");
+				//break;
 
 			case "Linux":
 			case "FreeBSD":
 			case "NetBSD":
 			case "OpenBSD":
-			case "BSD":
-				_instance = new AndroidLibraryLoader();
-				GD.Print("[LibraryLoaderFactory] Using Linux library loader (dlopen)");
-				break;
-
 			case "macOS":
-				_instance = new AndroidLibraryLoader();
-				GD.Print("[LibraryLoaderFactory] Using macOS library loader (dlopen)");
+				_instance = new UnixLibraryLoader();
+				GD.Print($"[LibraryLoaderFactory] Using Unix library loader for {osName} (dlopen)");
 				break;
 
 			default:
-				GD.PrintErr($"[LibraryLoaderFactory] Unsupported platform: {osName}");
-				_instance = new WindowsLibraryLoader();
-				break;
+				throw new NotSupportedException($"Unsupported platform: {osName}");
 		}
 
 		return _instance;
