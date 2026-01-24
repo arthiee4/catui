@@ -2,45 +2,44 @@ using System;
 using System.Runtime.InteropServices;
 using Godot;
 
-public class UnixLibraryLoader : ILibraryLoader
-{
+public class UnixLibraryLoader : ILibraryLoader {
 	private const int RTLD_NOW = 2;
 
-	[DllImport("libdl", SetLastError = true)]
+	private const string LibName = "libc";
+
+	[DllImport(LibName, SetLastError = true, EntryPoint = "dlopen")]
 	private static extern IntPtr dlopen(string fileName, int flags);
 
-	[DllImport("libdl", SetLastError = true)]
+	[DllImport(LibName, SetLastError = true, EntryPoint = "dlsym")]
 	private static extern IntPtr dlsym(IntPtr handle, string symbol);
 
-	[DllImport("libdl", SetLastError = true)]
+	[DllImport(LibName, SetLastError = true, EntryPoint = "dlclose")]
 	private static extern int dlclose(IntPtr handle);
 
-	[DllImport("libdl", SetLastError = true)]
+	[DllImport(LibName, SetLastError = true, EntryPoint = "dlerror")]
 	private static extern IntPtr dlerror();
 
-	public IntPtr LoadLibrary(string path)
-	{
+	public IntPtr LoadLibrary(string path) {
 		FileLogger.Log($"[unix] trying to load: {path}");
 		FileLogger.Log($"[unix] file exists: {System.IO.File.Exists(path)}");
 		FileLogger.Log($"[unix] cur dir: {System.IO.Directory.GetCurrentDirectory()}");
 
 		IntPtr handle = dlopen(path, RTLD_NOW);
-		if (handle == IntPtr.Zero)
-		{
+
+		if (handle == IntPtr.Zero) {
 			string err = GetLastErrorString();
 			FileLogger.Error($"[unix] failed to load lib: {path}");
 			FileLogger.Error($"[unix] dlopen error: {err}");
 		}
-		else
-		{
+
+		else {
 			FileLogger.Log($"[unix] lib loaded: {path}");
 		}
 
 		return handle;
 	}
 
-	IntPtr ILibraryLoader.GetProcAddress(IntPtr handle, string functionName)
-	{
+	IntPtr ILibraryLoader.GetProcAddress(IntPtr handle, string functionName) {
 		IntPtr symbol = dlsym(handle, functionName);
 		if (symbol == IntPtr.Zero)
 		{
@@ -50,8 +49,7 @@ public class UnixLibraryLoader : ILibraryLoader
 		return symbol;
 	}
 
-	bool ILibraryLoader.FreeLibrary(IntPtr handle)
-	{
+	bool ILibraryLoader.FreeLibrary(IntPtr handle) {
 		int result = dlclose(handle);
 		if (result != 0)
 		{
@@ -62,20 +60,23 @@ public class UnixLibraryLoader : ILibraryLoader
 		return true;
 	}
 
-public string GetLibraryExtension()
-{
-	string osName = OS.GetName();
-	switch (osName)
-	{
-		case "macOS":
-			return ".dylib";
-		default:
-			return ".so";
+	public string GetLibraryExtension() {
+		string osName = OS.GetName();
+		switch (osName)
+		{
+			case "macOS":
+				return ".dylib";
+			case "Linux":
+			case "FreeBSD":
+			case "NetBSD":
+			case "OpenBSD":
+				return ".so";
+			default:
+				return ".so";
+		}
 	}
-}
 
-	private static string GetLastErrorString()
-	{
+	private static string GetLastErrorString() {
 		IntPtr errPtr = dlerror();
 		if (errPtr == IntPtr.Zero)
 			return "Unknown error";
