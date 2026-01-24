@@ -26,7 +26,7 @@ To run the source code, the setup is straightforward as this is a Godot project.
 	cd CATui
 	```
 2.  **Open and Run:**
-	* Launch the Godot Engine **v4.5**.
+	* Launch the Godot Engine **v4.5.1**.
 	* Click **"Import"** and select the `project.godot` file on the clone rep location.
 
 ---
