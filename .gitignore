@@ -34,4 +34,4 @@ builds/
 *.aab
 
 # android (huge files, will be uploaded separately)
-android/
+/android/
