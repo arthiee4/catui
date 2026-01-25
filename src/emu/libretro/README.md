@@ -1,59 +1,34 @@
 # Libretro Multi-Platform Support
 
-Esta estrutura permite que o emulador Libretro funcione em múltiplas plataformas (Windows, Android, Linux, macOS).
+So, this is the magic that makes Libretro emulators work on everything (Windows, Android, Linux, macOS).
 
-## Estrutura de Arquivos
+## File Structure
 
 ```
 src/emu/libretro/
-├── ILibraryLoader.cs              # Interface comum para todos os loaders
-├── LibraryLoaderFactory.cs        # Factory que escolhe o loader correto
-├── LibretroNative.cs              # API principal do Libretro (multiplataforma)
-├── LibretroPlayer.cs              # Player do emulador
+├── ILibraryLoader.cs              # Common loader interface
+├── LibraryLoaderFactory.cs        # Picks the right loader for the OS
+├── LibretroNative.cs              # The heavy lifting (C# <-> C interop)
+├── LibretroPlayer.cs              # Godot node that runs the game
 ├── windows/
-│   └── WindowsLibraryLoader.cs    # Implementação para Windows (kernel32.dll)
+│   └── WindowsLibraryLoader.cs    # Windows stuff (kernel32.dll)
 └── android/
-    └── AndroidLibraryLoader.cs    # Implementação para Android (libdl.so)
+    └── AndroidLibraryLoader.cs    # Android stuff (libdl.so)
 ```
 
-## Como Funciona
+## How it works
 
-1. **LibraryLoaderFactory** detecta automaticamente a plataforma em execução
-2. Cria o **ILibraryLoader** apropriado:
-   - Windows: usa `kernel32.dll` (LoadLibrary, GetProcAddress, FreeLibrary)
-   - Android/Linux/macOS: usa `libdl.so` (dlopen, dlsym, dlclose)
-3. **LibretroNative** usa o loader para carregar cores dinamicamente
+Basically, `LibraryLoaderFactory` checks what OS you're on and grabs the right tool to load the core (`.dll` or `.so`).
 
-## Suporte a Plataformas
+Then `LibretroNative` hooks into the core's C functions, and `LibretroPlayer` runs the show in Godot:
+*   **Video**: Puts the pixel buffer onto a `TextureRect`.
+*   **Audio**: Feeds sound into an `AudioStreamGenerator`.
+*   **Input**: Maps Godot keys/buttons to the emulator.
 
-### Windows
-- Extensão de biblioteca: `.dll`
-- API: kernel32.dll (LoadLibrary)
+## Platform Notes
 
-### Android
-- Extensão de biblioteca: `.so`
-- API: libdl.so (dlopen)
-- Arquitetura suportada: armeabi-v7a (antigos), arm64-v8a (novos)
+*   **Windows**: Uses standard `.dll` files.
+*   **Android**: Uses `.so` files. **Important**: make sure you use the right arch (`armeabi-v7a` or `arm64-v8a`) or it explodes.
+*   **Linux/macOS**: Should work similar to Android but haven't tested much.
 
-### Linux (Untested)
-- Extensão de biblioteca: `.so`
-- API: libdl.so (dlopen)
-
-### macOS
-- Extensão de biblioteca: `.dylib` ou `.so`
-- API: libdl.so (dlopen)
-
-## Uso no Android
-
-Para usar cores Libretro no Android:
-
-1. Importe o core `.so` compilado para Android (ex: `mgba_libretro_android.so`)
-2. O sistema detectará automaticamente que está no Android
-3. Usará `dlopen` em vez de `LoadLibrary`
-4. O jogo funcionará normalmente
-
-## Notas Importantes
-
-- **Arquitetura ARM**: Certifique-se de que o core `.so` foi compilado para a arquitetura correta (armeabi-v7a ou arm64-v8a)
-- **Permissões**: No Android, pode ser necessário permissões de armazenamento
-- **Paths**: Use `user://` ou caminhos relativos para compatibilidade multiplataforma
+To play, just call `LibretroPlayer.LoadGame(romPath)` and enjoy :3
