@@ -33,7 +33,7 @@ To run the source code, the setup is straightforward as this is a Godot project.
 
 ## Emulator Setup
 
-CATui uses **Libretro cores** to run games. You need to download the core DLLs and configure the paths.
+CATui uses **libretro cores** to run games. You need to download the core DLLs and configure the paths.
 
 ### Supported Consoles
 
