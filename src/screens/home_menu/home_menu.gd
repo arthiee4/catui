@@ -77,7 +77,7 @@ func _open_quick_menu():
 		return
 	
 	_quick_menu_active = true
-	set_process_input(false) # disable input so we don't accidentally click stuff behind
+	set_process_input(false) # freeze input so we dont click random stuff behind
 	quick_menu.open()
 
 
@@ -97,7 +97,7 @@ func _ready():
 	if continue_button:
 		continue_button.visible = false
 	
-	# try to find the quick menu relative to the continue button
+	# searching for quick menu on the continue button
 	if continue_button:
 		quick_menu = continue_button.get_node_or_null("quick_menu")
 		if quick_menu and quick_menu.has_method("close"):
@@ -109,7 +109,7 @@ func _ready():
 				quick_menu.state_action_completed.connect(func():
 					_quick_menu_active = false
 					set_process_input(true)
-					# tiny delay to prevent input bleeding
+					# tiny nap to stop input bleeding
 					await get_tree().create_timer(0.1).timeout
 					item_selected.emit("continue")
 				)
@@ -170,7 +170,7 @@ func _navigate(direction: int):
 	var old_focus = current_focus
 	current_focus = wrapi(current_focus + direction, 0, menu_items.size())
 	
-	# if we move away from the continue button, close the quick menu
+	# if we leave continue button, bye quick menu
 	if _quick_menu_active and quick_menu:
 		var old_item = menu_items[old_focus] if old_focus < menu_items.size() else null
 		var new_item = menu_items[current_focus] if current_focus < menu_items.size() else null

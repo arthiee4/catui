@@ -105,7 +105,7 @@ func _update_ui_visibility():
 		EmuImageBorder.visible = true
 
 func _get_image_from_core(_core_path: String) -> String:
-	return "res://assets/images/catui/logo2_icon.png"
+	return "res://assets/images/catui/logoAPP.png"
 
 func set_core(path: String):
 	libretro_core = path

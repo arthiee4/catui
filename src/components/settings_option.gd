@@ -13,7 +13,15 @@ func update_icon(icon: Texture2D):
 		texture_rect.texture = icon
 
 func set_active(active: bool):
+	# set transparency and focus panel so we know whos the chosen one
 	if active:
 		modulate.a = 1.0
 	else:
 		modulate.a = 0.7
+		
+	var focus_node = get_node_or_null("Focus")
+	if not focus_node:
+		focus_node = get_node_or_null("style/focus")
+	
+	if focus_node:
+		focus_node.visible = active

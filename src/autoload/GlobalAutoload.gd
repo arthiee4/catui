@@ -21,11 +21,11 @@ var current_game_texture: Texture2D = null
 var current_system_name: String = ""
 var current_rom_path: String = ""
 
-# systems that we know support save states
+# systems that can handle save states
 var supported_systems_quick_menu: Array[String] = ["snes", "snes9x", "gba", "mgba", "vbam", "nes", "fceumm", "gb", "gbc", "gambatte", "gen", "md", "genesis_plus_gx"]
 
 func is_quick_menu_compatible(system: String) -> bool:
-	# checks if the current system allows for quick menu features
+	# checks if this system is cool enough for quick menu
 	return system.to_lower() in supported_systems_quick_menu
 
 signal context_changed(new_context: Context)

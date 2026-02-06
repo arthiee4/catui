@@ -5,6 +5,7 @@ using Godot;
 using System;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Collections.Generic;
 
 public partial class LibretroPlayer : Node
 {
@@ -37,14 +38,25 @@ public partial class LibretroPlayer : Node
 	private double _ignoreInputTimer = 0.0;
 
 	// optimization: using static buffers here so the garbage collector doesn't go crazy with allocations
+	private static HashSet<string> _validActions = new HashSet<string>();
+	private static bool _actionsCached = false;
+
 	private static byte[] _pixelBuffer;
 	private static short[] _audioRawBuffer;
 	private static Vector2[] _audioGodotBuffer;
+	
+	[StructLayout(LayoutKind.Sequential)]
+	private struct retro_variable
+	{
+		public IntPtr key;
+		public IntPtr value;
+	}
+	
+	private static Dictionary<string, IntPtr> _variableValuePtrs = new Dictionary<string, IntPtr>();
 
 	public override void _Ready()
 	{
 		_instance = this;
-		// supporting gba, snes, nes, gb, gbc
 	}
 
 	private void EnsureNodesReady()
@@ -165,6 +177,7 @@ public partial class LibretroPlayer : Node
 		_isGameRunning = false;
 		_isPaused = false;
 		_coreInitialized = false;
+		_actionsCached = false;
 		// _gameTexture = null; // keeping the texture reference to avoid unnecessary GC churn
 		
 		if (_gameAudio != null)
@@ -234,6 +247,22 @@ public partial class LibretroPlayer : Node
 
 	private IntPtr _romDataPtr = IntPtr.Zero;
 
+	private static void CacheValidActions()
+	{
+		if (_actionsCached) return;
+		
+		_validActions.Clear();
+		var actions = Input.GetConnectedJoypads();
+		
+		foreach (var action in InputMap.GetActions())
+		{
+			_validActions.Add(action.ToString());
+		}
+		
+		_actionsCached = true;
+		FileLogger.Log($"[LibretroPlayer] Cached {_validActions.Count} input actions");
+	}
+
 	private void StartEmulator()
 	{
 		// FileLogger.Log("[LibretroPlayer] StartEmulator - BEGIN");
@@ -246,6 +275,8 @@ public partial class LibretroPlayer : Node
 			_inputStateCallback = new LibretroNative.RetroInputStateDelegate(InputStateCallback);
 			_audioCallback = new LibretroNative.RetroAudioSampleDelegate(AudioSampleCallback);
 			_audioBatchCallback = new LibretroNative.RetroAudioSampleBatchDelegate(AudioBatchCallback);
+
+			CacheValidActions();
 
 			// FileLogger.Log("[LibretroPlayer] Setting callbacks to core...");
 			LibretroNative.retro_set_environment(_envCallback);
@@ -413,96 +444,34 @@ public partial class LibretroPlayer : Node
 		if (port != 0) return 0;
 		if (device != 1) return 0;
 
-		string corePrefix = GetControlPrefix();
-		string actionName = GetActionNameForButton((LibretroInput)id, corePrefix);
+		string coreId = !string.IsNullOrEmpty(LibretroNative.CurrentCoreId) 
+			? LibretroNative.CurrentCoreId 
+			: GetCoreFallbackId();
 		
-		if (!string.IsNullOrEmpty(actionName) && Input.IsActionPressed(actionName))
+		string actionName = InputMapper.GetActionName(coreId, (LibretroInput)id);
+		
+		if (string.IsNullOrEmpty(actionName)) return 0;
+		
+		if (!_validActions.Contains(actionName)) return 0;
+		
+		if (Input.IsActionPressed(actionName))
 			return 1;
 			
 		return 0;
 	}
 
-	private static string GetControlPrefix()
+	private static string GetCoreFallbackId()
 	{
-		if (!string.IsNullOrEmpty(LibretroNative.CurrentCoreId))
-			return LibretroNative.CurrentCoreId;
-
-		switch (LibretroNative.CurrentCore)
+		return LibretroNative.CurrentCore switch
 		{
-			case EmulatorCore.GBA_MGBA:
-			case EmulatorCore.GBA_VBAM:
-				return "gba";
-			case EmulatorCore.SNES_SNES9X:
-				return "snes";
-			case EmulatorCore.NES_FCEUMM:
-				return "nes";
-			case EmulatorCore.GB_GAMBATTE:
-				return "gb";
-			case EmulatorCore.GBC_GAMBATTE:
-				return "gbc";
-			default:
-				return "gba";
-		}
-	}
-
-	private static string GetActionNameForButton(LibretroInput button, string prefix)
-	{
-		switch (prefix)
-		{
-			case "gba": case "gb": case "gbc": return GetGBAButtonName(button, prefix);
-			case "snes": return GetSNESButtonName(button, prefix);
-			case "nes": return GetNESButtonName(button, prefix);
-			default: return GetGenericButtonName(button, prefix);
-		}
-	}
-	
-	private static string GetGenericButtonName(LibretroInput button, string prefix)
-	{
-		string buttonName = button switch
-		{
-			LibretroInput.A => "a", LibretroInput.B => "b", LibretroInput.X => "x", LibretroInput.Y => "y",
-			LibretroInput.START => "start", LibretroInput.SELECT => "select",
-			LibretroInput.UP => "up", LibretroInput.DOWN => "down", LibretroInput.LEFT => "left", LibretroInput.RIGHT => "right",
-			LibretroInput.L => "l", LibretroInput.R => "r", LibretroInput.L2 => "l2", LibretroInput.R2 => "r2",
-			_ => ""
+			EmulatorCore.GBA_MGBA => "gba",
+			EmulatorCore.GBA_VBAM => "gba",
+			EmulatorCore.SNES_SNES9X => "snes",
+			EmulatorCore.NES_FCEUMM => "nes",
+			EmulatorCore.GB_GAMBATTE => "gb",
+			EmulatorCore.GBC_GAMBATTE => "gbc",
+			_ => "gba"
 		};
-		return string.IsNullOrEmpty(buttonName) ? "" : $"{prefix}_{buttonName}";
-	}
-
-	private static string GetGBAButtonName(LibretroInput button, string prefix)
-	{
-		string buttonName = button switch
-		{
-			LibretroInput.A => "a", LibretroInput.B => "b", LibretroInput.START => "start", LibretroInput.SELECT => "select",
-			LibretroInput.UP => "up", LibretroInput.DOWN => "down", LibretroInput.LEFT => "left", LibretroInput.RIGHT => "right",
-			LibretroInput.L => "l", LibretroInput.R => "r",
-			_ => ""
-		};
-		return string.IsNullOrEmpty(buttonName) ? "" : $"{prefix}_{buttonName}";
-	}
-
-	private static string GetSNESButtonName(LibretroInput button, string prefix)
-	{
-		string buttonName = button switch
-		{
-			LibretroInput.A => "a", LibretroInput.B => "b", LibretroInput.X => "x", LibretroInput.Y => "y",
-			LibretroInput.START => "start", LibretroInput.SELECT => "select",
-			LibretroInput.UP => "up", LibretroInput.DOWN => "down", LibretroInput.LEFT => "left", LibretroInput.RIGHT => "right",
-			LibretroInput.L => "l", LibretroInput.R => "r",
-			_ => ""
-		};
-		return string.IsNullOrEmpty(buttonName) ? "" : $"{prefix}_{buttonName}";
-	}
-
-	private static string GetNESButtonName(LibretroInput button, string prefix)
-	{
-		string buttonName = button switch
-		{
-			LibretroInput.A => "a", LibretroInput.B => "b", LibretroInput.START => "start", LibretroInput.SELECT => "select",
-			LibretroInput.UP => "up", LibretroInput.DOWN => "down", LibretroInput.LEFT => "left", LibretroInput.RIGHT => "right",
-			_ => ""
-		};
-		return string.IsNullOrEmpty(buttonName) ? "" : $"{prefix}_{buttonName}";
 	}
 
 	private static IntPtr _saveDirectoryPtr = IntPtr.Zero;
@@ -552,9 +521,125 @@ public partial class LibretroPlayer : Node
 
 			case LibretroNative.RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME:
 				return true;
+			
+			case LibretroNative.RETRO_ENVIRONMENT_SET_VARIABLES:
+				return true;
+			
+			case LibretroNative.RETRO_ENVIRONMENT_GET_VARIABLE:
+				if (data != IntPtr.Zero)
+				{
+					retro_variable variable = Marshal.PtrToStructure<retro_variable>(data);
+					string key = Marshal.PtrToStringAnsi(variable.key);
+					
+					if (!string.IsNullOrEmpty(key))
+					{
+						string value = GetCoreVariableValue(key);
+						if (!string.IsNullOrEmpty(value))
+						{
+							if (_variableValuePtrs.ContainsKey(key))
+							{
+								Marshal.FreeHGlobal(_variableValuePtrs[key]);
+							}
+							
+							IntPtr valuePtr = Marshal.StringToHGlobalAnsi(value);
+							_variableValuePtrs[key] = valuePtr;
+							
+							variable.value = valuePtr;
+							Marshal.StructureToPtr(variable, data, false);
+							return true;
+						}
+					}
+				}
+				return false;
+			
+			case LibretroNative.RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE:
+				if (data != IntPtr.Zero)
+				{
+					Marshal.WriteByte(data, 0);
+				}
+				return true;
 
 			default:
 				return false;
+		}
+	}
+	
+	private static string GetCoreVariableValue(string key)
+	{
+		if (string.IsNullOrEmpty(LibretroNative.CurrentCoreId)) return null;
+		
+		var sceneTree = (SceneTree)Engine.GetMainLoop();
+		var emulatorConfig = sceneTree.Root.GetNode("EmulatorConfig");
+		
+		if (emulatorConfig == null) return null;
+		
+		string coreId = LibretroNative.CurrentCoreId;
+		string settingKey = ExtractSettingKeyFromVariable(key);
+		
+		if (string.IsNullOrEmpty(settingKey)) return null;
+		
+		var value = emulatorConfig.Call("get_emulator_setting", coreId, "core", settingKey, default(Variant));
+		
+		if (value.Obj == null) return null;
+		
+		return ConvertSettingToLibretroValue(key, settingKey, value);
+	}
+	
+	private static string ExtractSettingKeyFromVariable(string variableKey)
+	{
+		if (variableKey.Contains("resolution")) return "internal_resolution";
+		if (variableKey.Contains("dithering")) return "dithering";
+		if (variableKey.Contains("enhanced")) return "enhanced_resolution";
+		if (variableKey.Contains("interpolation")) return "audio_interpolation";
+		if (variableKey.Contains("superfx") || variableKey.Contains("overclock")) return "superfx_overclock";
+		if (variableKey.Contains("slowdown")) return "reduce_slowdown";
+		if (variableKey.Contains("region")) return "region";
+		if (variableKey.Contains("audio") && variableKey.Contains("quality")) return "audio_quality";
+		if (variableKey.Contains("68k")) return "m68k_overclock";
+		
+		return null;
+	}
+	
+	private static string ConvertSettingToLibretroValue(string variableKey, string settingKey, Variant value)
+	{
+		switch (settingKey)
+		{
+			case "internal_resolution":
+				string res = value.ToString();
+				if (res.Contains("1x")) return "1";
+				if (res.Contains("2x")) return "2";
+				if (res.Contains("4x")) return "4";
+				if (res.Contains("8x")) return "8";
+				return "1";
+			
+			case "dithering":
+			case "enhanced_resolution":
+			case "reduce_slowdown":
+				return value.AsBool() ? "enabled" : "disabled";
+			
+			case "audio_interpolation":
+				return value.ToString().ToLower();
+			
+			case "superfx_overclock":
+			case "m68k_overclock":
+				// Handle float to int conversion safely
+				float floatVal = 100.0f;
+				try { floatVal = value.AsSingle(); } catch { try { floatVal = value.AsInt32(); } catch { } }
+				return ((int)floatVal).ToString();
+			
+			case "region":
+				string region = value.ToString();
+				if (region.Contains("Auto")) return "auto";
+				if (region.Contains("Japan")) return "ntsc-j";
+				if (region.Contains("USA")) return "ntsc-u";
+				if (region.Contains("Europe")) return "pal";
+				return "auto";
+			
+			case "audio_quality":
+				return value.ToString().ToLower();
+			
+			default:
+				return value.ToString();
 		}
 	}
 
@@ -703,7 +788,17 @@ public partial class LibretroPlayer : Node
 	{
 		retro_pixel_format format = (retro_pixel_format)formatInt;
 		Image.Format godotFormat = GetGodotFormat(format);
-		Image img = Image.CreateFromData(width, height, false, godotFormat, pixels);
+		
+		byte[] imageData = pixels;
+		int expectedSize = width * height * GetBytesPerPixel(format);
+		
+		if (pixels.Length > expectedSize)
+		{
+			imageData = new byte[expectedSize];
+			Array.Copy(pixels, imageData, expectedSize);
+		}
+		
+		Image img = Image.CreateFromData(width, height, false, godotFormat, imageData);
 		
 		if (_gameTexture == null || _gameTexture.GetWidth() != width || _gameTexture.GetHeight() != height)
 		{

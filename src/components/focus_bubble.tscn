@@ -1,6 +1,6 @@
-[gd_scene load_steps=11 format=3 uid="uid://d4l8wc64ndurt"]
+[gd_scene format=3 uid="uid://d4l8wc64ndurt"]
 
-[ext_resource type="Script" path="res://src/components/focus_bubble.gd" id="1_phwvo"]
+[ext_resource type="Script" uid="uid://dw62w5e8kpk1j" path="res://src/components/focus_bubble.gd" id="1_phwvo"]
 [ext_resource type="Shader" uid="uid://bm0o86476h78v" path="res://src/shaders/blur.gdshader" id="2_1sfep"]
 [ext_resource type="FontFile" uid="uid://l2nuxykino4m" path="res://assets/fonts/Nunito-Black.ttf" id="3_1sfep"]
 
@@ -230,7 +230,7 @@ _data = {
 &"on": SubResource("Animation_phwvo")
 }
 
-[node name="focus_bubble" type="Control"]
+[node name="focus_bubble" type="Control" unique_id=1725258336]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 279.735
@@ -238,7 +238,7 @@ offset_bottom = 63.610992
 pivot_offset = Vector2(139.5, 31)
 script = ExtResource("1_phwvo")
 
-[node name="style" type="Control" parent="."]
+[node name="style" type="Control" parent="." unique_id=270450194]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -250,7 +250,7 @@ offset_bottom = -38.999992
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="BlurBackground" type="Panel" parent="style"]
+[node name="BlurBackground" type="Panel" parent="style" unique_id=1372960231]
 visible = false
 material = SubResource("ShaderMaterial_mlv6i")
 layout_mode = 1
@@ -261,7 +261,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_tb146")
 
-[node name="Color" type="Panel" parent="style"]
+[node name="Color" type="Panel" parent="style" unique_id=821402753]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -270,7 +270,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_e7lu8")
 
-[node name="detail1" type="Control" parent="."]
+[node name="detail1" type="Control" parent="." unique_id=277132806]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -284,7 +284,7 @@ offset_bottom = -0.61099243
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Color" type="Panel" parent="detail1"]
+[node name="Color" type="Panel" parent="detail1" unique_id=842063826]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -293,7 +293,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_e7lu8")
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=409382730]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -312,7 +312,5 @@ horizontal_alignment = 1
 vertical_alignment = 1
 text_overrun_behavior = 1
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_1sfep")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2129264106]
+libraries/ = SubResource("AnimationLibrary_1sfep")

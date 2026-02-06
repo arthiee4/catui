@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://bpe3d3vppqna"]
+[gd_scene format=3 uid="uid://bpe3d3vppqna"]
 
 [ext_resource type="Script" uid="uid://c2fqfcks02qnt" path="res://src/screens/home_menu/home_menu.gd" id="1_4k5wn"]
 [ext_resource type="Shader" uid="uid://btqooupsrdvmq" path="res://src/shaders/focus.gdshader" id="2_jccx7"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://ksegk7diiso6" path="res://src/components/quick_menu/quick_menu.gd" id="5_yhqxx"]
 [ext_resource type="Texture2D" uid="uid://0h58jg1hnsaw" path="res://assets/icons/settings.png" id="6_ba8yr"]
 [ext_resource type="PackedScene" uid="uid://b1v76p0uwxw20" path="res://src/components/quick_menu/quick_button.tscn" id="6_fex7u"]
+[ext_resource type="Texture2D" uid="uid://ox4ll0c54k2b" path="res://assets/icons/saves.png" id="10_fex7u"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4k5wn"]
 bg_color = Color(1, 1, 1, 1)
@@ -99,7 +100,7 @@ corner_radius_top_right = 55
 corner_radius_bottom_right = 55
 corner_radius_bottom_left = 55
 
-[node name="home_menu" type="Control"]
+[node name="home_menu" type="Control" unique_id=1398803584]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -110,7 +111,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_4k5wn")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Panel" type="Panel" parent="." unique_id=485874328]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -119,7 +120,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_4k5wn")
 
-[node name="_" type="Control" parent="."]
+[node name="_" type="Control" parent="." unique_id=346453099]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -133,7 +134,7 @@ offset_bottom = -53.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="style" type="Control" parent="_"]
+[node name="style" type="Control" parent="_" unique_id=606276144]
 custom_minimum_size = Vector2(0, 84.055)
 layout_mode = 1
 anchors_preset = 15
@@ -147,7 +148,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_y162y")
 
-[node name="shadow" type="Panel" parent="_/style"]
+[node name="shadow" type="Panel" parent="_/style" unique_id=102694591]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -156,7 +157,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_oc17h")
 
-[node name="color" type="Panel" parent="_/style"]
+[node name="color" type="Panel" parent="_/style" unique_id=1789298196]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -165,7 +166,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_yh4kr")
 
-[node name="options" type="Control" parent="_"]
+[node name="options" type="Control" parent="_" unique_id=912973533]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -176,7 +177,7 @@ offset_right = 265.0
 offset_bottom = 35.0
 grow_horizontal = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="_/options"]
+[node name="HBoxContainer" type="HBoxContainer" parent="_/options" unique_id=2045914985]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -190,11 +191,11 @@ grow_vertical = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="continue" type="Control" parent="_/options/HBoxContainer"]
+[node name="continue" type="Control" parent="_/options/HBoxContainer" unique_id=1860805370]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 
-[node name="style" type="Control" parent="_/options/HBoxContainer/continue"]
+[node name="style" type="Control" parent="_/options/HBoxContainer/continue" unique_id=695673381]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -202,7 +203,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="_/options/HBoxContainer/continue/style"]
+[node name="Panel" type="Panel" parent="_/options/HBoxContainer/continue/style" unique_id=117611714]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -211,7 +212,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_25uep")
 
-[node name="focus" type="Panel" parent="_/options/HBoxContainer/continue/style"]
+[node name="focus" type="Panel" parent="_/options/HBoxContainer/continue/style" unique_id=2010495614]
 material = SubResource("ShaderMaterial_ba8yr")
 layout_mode = 1
 anchors_preset = 15
@@ -221,7 +222,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_y162y")
 
-[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/continue"]
+[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/continue" unique_id=1785477513]
 clip_children = 1
 layout_mode = 1
 anchors_preset = 15
@@ -235,7 +236,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_jccx7")
 
-[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/continue/icon_texture"]
+[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/continue/icon_texture" unique_id=1330530936]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -246,7 +247,7 @@ texture = ExtResource("2_kgc7l")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="quick_menu" type="Control" parent="_/options/HBoxContainer/continue"]
+[node name="quick_menu" type="Control" parent="_/options/HBoxContainer/continue" unique_id=38494035]
 visible = false
 custom_minimum_size = Vector2(160, 140)
 layout_mode = 1
@@ -261,7 +262,7 @@ grow_horizontal = 2
 pivot_offset = Vector2(80, 140)
 script = ExtResource("5_yhqxx")
 
-[node name="_" type="Control" parent="_/options/HBoxContainer/continue/quick_menu"]
+[node name="_" type="Control" parent="_/options/HBoxContainer/continue/quick_menu" unique_id=1260195412]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -269,7 +270,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="style" type="Control" parent="_/options/HBoxContainer/continue/quick_menu/_"]
+[node name="style" type="Control" parent="_/options/HBoxContainer/continue/quick_menu/_" unique_id=1556599893]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -277,7 +278,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="shadow" type="Panel" parent="_/options/HBoxContainer/continue/quick_menu/_/style"]
+[node name="shadow" type="Panel" parent="_/options/HBoxContainer/continue/quick_menu/_/style" unique_id=1412003247]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -286,7 +287,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_fnpm8")
 
-[node name="border" type="Panel" parent="_/options/HBoxContainer/continue/quick_menu/_/style"]
+[node name="border" type="Panel" parent="_/options/HBoxContainer/continue/quick_menu/_/style" unique_id=1698141329]
 material = SubResource("ShaderMaterial_yhqxx")
 layout_mode = 1
 anchors_preset = 15
@@ -296,7 +297,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_fex7u")
 
-[node name="Panel" type="Panel" parent="_/options/HBoxContainer/continue/quick_menu/_/style"]
+[node name="Panel" type="Panel" parent="_/options/HBoxContainer/continue/quick_menu/_/style" unique_id=539730410]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -305,7 +306,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_fex7u")
 
-[node name="MarginContainer" type="MarginContainer" parent="_/options/HBoxContainer/continue/quick_menu/_"]
+[node name="MarginContainer" type="MarginContainer" parent="_/options/HBoxContainer/continue/quick_menu/_" unique_id=1785409705]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -317,21 +318,21 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="ScrollContainer" type="ScrollContainer" parent="_/options/HBoxContainer/continue/quick_menu/_/MarginContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="_/options/HBoxContainer/continue/quick_menu/_/MarginContainer" unique_id=1237671558]
 layout_mode = 2
 horizontal_scroll_mode = 3
 vertical_scroll_mode = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="_/options/HBoxContainer/continue/quick_menu/_/MarginContainer/ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="_/options/HBoxContainer/continue/quick_menu/_/MarginContainer/ScrollContainer" unique_id=578742528]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 alignment = 1
 
-[node name="quick_button" parent="_/options/HBoxContainer/continue/quick_menu/_/MarginContainer/ScrollContainer/VBoxContainer" instance=ExtResource("6_fex7u")]
+[node name="quick_button" parent="_/options/HBoxContainer/continue/quick_menu/_/MarginContainer/ScrollContainer/VBoxContainer" unique_id=499099640 instance=ExtResource("6_fex7u")]
 layout_mode = 2
 
-[node name="button_x" type="TextureRect" parent="_/options/HBoxContainer/continue"]
+[node name="button_x" type="TextureRect" parent="_/options/HBoxContainer/continue" unique_id=2083219852]
 visible = false
 layout_mode = 1
 anchors_preset = 5
@@ -346,11 +347,11 @@ texture = ExtResource("4_yhqxx")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="home" type="Control" parent="_/options/HBoxContainer"]
+[node name="home" type="Control" parent="_/options/HBoxContainer" unique_id=137582968]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 
-[node name="style" type="Control" parent="_/options/HBoxContainer/home"]
+[node name="style" type="Control" parent="_/options/HBoxContainer/home" unique_id=1642959126]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -358,7 +359,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="_/options/HBoxContainer/home/style"]
+[node name="Panel" type="Panel" parent="_/options/HBoxContainer/home/style" unique_id=2087522774]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -367,7 +368,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_25uep")
 
-[node name="focus" type="Panel" parent="_/options/HBoxContainer/home/style"]
+[node name="focus" type="Panel" parent="_/options/HBoxContainer/home/style" unique_id=145617452]
 visible = false
 material = SubResource("ShaderMaterial_ba8yr")
 layout_mode = 1
@@ -378,7 +379,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_y162y")
 
-[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/home"]
+[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/home" unique_id=448712530]
 clip_children = 1
 layout_mode = 1
 anchors_preset = 15
@@ -392,7 +393,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_jccx7")
 
-[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/home/icon_texture"]
+[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/home/icon_texture" unique_id=1364631512]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -403,11 +404,11 @@ texture = ExtResource("4_ba8yr")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="library" type="Control" parent="_/options/HBoxContainer"]
+[node name="library" type="Control" parent="_/options/HBoxContainer" unique_id=139198483]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 
-[node name="style" type="Control" parent="_/options/HBoxContainer/library"]
+[node name="style" type="Control" parent="_/options/HBoxContainer/library" unique_id=196613411]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -415,7 +416,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="_/options/HBoxContainer/library/style"]
+[node name="Panel" type="Panel" parent="_/options/HBoxContainer/library/style" unique_id=324383700]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -424,7 +425,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_25uep")
 
-[node name="focus" type="Panel" parent="_/options/HBoxContainer/library/style"]
+[node name="focus" type="Panel" parent="_/options/HBoxContainer/library/style" unique_id=1531807342]
 visible = false
 material = SubResource("ShaderMaterial_ba8yr")
 layout_mode = 1
@@ -435,7 +436,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_y162y")
 
-[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/library"]
+[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/library" unique_id=928826927]
 clip_children = 1
 layout_mode = 1
 anchors_preset = 15
@@ -449,7 +450,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_jccx7")
 
-[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/library/icon_texture"]
+[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/library/icon_texture" unique_id=39966762]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -460,11 +461,11 @@ texture = ExtResource("5_25uep")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="saves" type="Control" parent="_/options/HBoxContainer"]
+[node name="saves" type="Control" parent="_/options/HBoxContainer" unique_id=1102578458]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 
-[node name="style" type="Control" parent="_/options/HBoxContainer/saves"]
+[node name="style" type="Control" parent="_/options/HBoxContainer/saves" unique_id=1710061983]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -472,7 +473,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="_/options/HBoxContainer/saves/style"]
+[node name="Panel" type="Panel" parent="_/options/HBoxContainer/saves/style" unique_id=1729897929]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -481,7 +482,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_25uep")
 
-[node name="focus" type="Panel" parent="_/options/HBoxContainer/saves/style"]
+[node name="focus" type="Panel" parent="_/options/HBoxContainer/saves/style" unique_id=2067537879]
 visible = false
 material = SubResource("ShaderMaterial_ba8yr")
 layout_mode = 1
@@ -492,7 +493,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_y162y")
 
-[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/saves"]
+[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/saves" unique_id=1625615993]
 clip_children = 1
 layout_mode = 1
 anchors_preset = 15
@@ -506,22 +507,22 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_jccx7")
 
-[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/saves/icon_texture"]
+[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/saves/icon_texture" unique_id=595517550]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("5_25uep")
+texture = ExtResource("10_fex7u")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="settings" type="Control" parent="_/options/HBoxContainer"]
+[node name="settings" type="Control" parent="_/options/HBoxContainer" unique_id=280048618]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 
-[node name="style" type="Control" parent="_/options/HBoxContainer/settings"]
+[node name="style" type="Control" parent="_/options/HBoxContainer/settings" unique_id=910132766]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -529,7 +530,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="_/options/HBoxContainer/settings/style"]
+[node name="Panel" type="Panel" parent="_/options/HBoxContainer/settings/style" unique_id=274897757]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -538,7 +539,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_25uep")
 
-[node name="focus" type="Panel" parent="_/options/HBoxContainer/settings/style"]
+[node name="focus" type="Panel" parent="_/options/HBoxContainer/settings/style" unique_id=1334526341]
 visible = false
 material = SubResource("ShaderMaterial_ba8yr")
 layout_mode = 1
@@ -549,7 +550,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_y162y")
 
-[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/settings"]
+[node name="icon_texture" type="Panel" parent="_/options/HBoxContainer/settings" unique_id=1690362029]
 clip_children = 1
 layout_mode = 1
 anchors_preset = 15
@@ -563,7 +564,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_jccx7")
 
-[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/settings/icon_texture"]
+[node name="TextureRect" type="TextureRect" parent="_/options/HBoxContainer/settings/icon_texture" unique_id=1599396463]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

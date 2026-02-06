@@ -107,6 +107,9 @@ public partial class LibretroNative : Node
 	public const uint RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME = 18;
 	public const uint RETRO_ENVIRONMENT_GET_LOG_INTERFACE = 27;
 	public const uint RETRO_ENVIRONMENT_GET_CAN_DUPE = 3;
+	public const uint RETRO_ENVIRONMENT_SET_VARIABLES = 16;
+	public const uint RETRO_ENVIRONMENT_GET_VARIABLE = 15;
+	public const uint RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE = 17;
 
 	public static bool SetCoreFromRomPath(string romPath)
 	{

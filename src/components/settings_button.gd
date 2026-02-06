@@ -77,8 +77,8 @@ func _ready():
 	_update_type()
 	_update_label()
 	_update_checkbox()
-	_update_slider()
 	_update_slider_range()
+	_update_slider()
 
 func _setup_connections():
 	if not Engine.is_editor_hint():
@@ -118,33 +118,29 @@ func _update_type():
 	if label_node:
 		label_node.visible = true
 		if button_type == ButtonType.BUTTON:
+			# center text because reasons
 			label_node.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			label_node.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 			label_node.anchors_preset = Control.PRESET_FULL_RECT
 			label_node.offset_left = 0
 			label_node.offset_right = 0
 			label_node.offset_top = 0
 			label_node.offset_bottom = 0
-			label_node.anchor_left = 0.0
-			label_node.anchor_right = 1.0
-			label_node.anchor_top = 0.5
-			label_node.anchor_bottom = 0.5
-			label_node.offset_top = -11
-			label_node.offset_bottom = 12
 		else:
+			label_node.anchors_preset = Control.PRESET_CENTER_LEFT
 			label_node.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-			label_node.anchor_left = 0.0
-			label_node.anchor_right = 0.0
-			label_node.anchor_top = 0.5
-			label_node.anchor_bottom = 0.5
-			label_node.offset_left = 14
-			label_node.offset_top = -11
-			label_node.offset_right = 54
-			label_node.offset_bottom = 12
+			label_node.set_anchors_preset(Control.PRESET_CENTER_LEFT, true) # make sure layout knows whats up
+			label_node.offset_left = 15
+			
+		label_node.custom_minimum_size.x = 150
 	
 	if checkbox_node:
 		checkbox_node.visible = (button_type == ButtonType.CHECKBOX)
 	if slider_node:
 		slider_node.visible = (button_type == ButtonType.SLIDER)
+		if button_type == ButtonType.SLIDER:
+			slider_node.focus_mode = Control.FOCUS_NONE
+			slider_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if value_node:
 		if button_type == ButtonType.SLIDER:
 			value_node.visible = true
@@ -189,7 +185,7 @@ func _update_slider():
 	if slider_node:
 		slider_node.value = slider_value * (slider_max - slider_min) + slider_min
 	
-	if value_node:
+	if value_node and button_type == ButtonType.SLIDER:
 		var display_value = slider_value * (slider_max - slider_min) + slider_min
 		value_node.text = str(int(display_value)) if slider_step >= 1.0 else "%.1f" % display_value
 

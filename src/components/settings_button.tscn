@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://dxlco4jpbw8ly"]
+[gd_scene format=3 uid="uid://dxlco4jpbw8ly"]
 
 [ext_resource type="Script" uid="uid://0wlivq1fktcd" path="res://src/components/settings_button.gd" id="1_p2531"]
 [ext_resource type="Shader" uid="uid://btqooupsrdvmq" path="res://src/shaders/focus.gdshader" id="2_k4nj3"]
@@ -23,51 +23,54 @@ expand_margin_left = 8.0
 expand_margin_right = 8.0
 expand_margin_bottom = 4.0
 
-[node name="settings_button" type="Control"]
+[node name="settings_button" type="Control" unique_id=74908884]
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 540.0
+offset_right = 694.0
 offset_bottom = 60.0
 script = ExtResource("1_p2531")
-button_type = 4
+button_type = 5
+checkbox_value = true
 
-[node name="style" type="Control" parent="."]
+[node name="style" type="Control" parent="." unique_id=1284775440]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 8.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="focus" type="Panel" parent="style"]
+[node name="focus" type="Panel" parent="style" unique_id=1634605877]
 material = SubResource("ShaderMaterial_o6yqc")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 4.0
-offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_hmsjl")
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=933393620]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = 14.0
-offset_top = -11.0
-offset_right = 54.0
-offset_bottom = 12.0
+offset_left = 15.0
+offset_top = -14.5
+offset_right = 150.0
+offset_bottom = 14.5
 grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 0.7176471)
 theme_override_fonts/font = ExtResource("3_o6yqc")
 theme_override_font_sizes/font_size = 20
 text = "Option"
+vertical_alignment = 1
 
-[node name="CheckBox" type="CheckBox" parent="."]
+[node name="CheckBox" type="CheckBox" parent="." unique_id=900825422]
 visible = false
 layout_mode = 1
 anchors_preset = 6
@@ -75,15 +78,17 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -24.0
+offset_left = -34.0
 offset_top = -12.0
+offset_right = -10.0
 offset_bottom = 12.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_font_sizes/font_size = 1
+button_pressed = true
 alignment = 2
 
-[node name="Button" type="Button" parent="."]
+[node name="Button" type="Button" parent="." unique_id=1039241246]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -95,7 +100,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 0)
 theme_override_font_sizes/font_size = 1
 flat = true
 
-[node name="HSlider" type="HSlider" parent="."]
+[node name="HSlider" type="HSlider" parent="." unique_id=1228430265]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -111,7 +116,7 @@ grow_horizontal = 2
 grow_vertical = 2
 value = 50.0
 
-[node name="Value" type="Label" parent="."]
+[node name="Value" type="Label" parent="." unique_id=171422998]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -127,7 +132,7 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 0.6666667)
 theme_override_fonts/font = ExtResource("3_o6yqc")
 theme_override_font_sizes/font_size = 20
-text = "50"
+text = "---"
 horizontal_alignment = 2
 vertical_alignment = 1
 clip_text = true

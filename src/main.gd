@@ -43,6 +43,10 @@ func _ready():
 	auto_save_manager.name = "AutoSaveManager"
 	add_child(auto_save_manager)
 
+	# Temporary: Clear old hashes to apply header stripping fixes
+	# RomHasher.clear_cache()
+	# print("MAIN: ROM hash cache cleared for update")
+
 	_hide_all_menus()
 	_register_dynamic_menus()
 	
@@ -133,7 +137,7 @@ func _hide_dynamic_menu(menu_key: String = ""):
 	GlobalAutoload.set_context(GlobalAutoload.Context.HOME_MENU)
 
 func _on_emulator_config_changed(emulator_id: String, _config: Dictionary):
-	# only update if it matches the running emulator
+	# only update if its the emulator running right now
 	if emulator_id == current_emulator and is_game_running:
 		_apply_emulator_settings(emulator_id)
 
@@ -393,8 +397,32 @@ func _apply_emulator_settings(emulator_id: String):
 	if not game_screen:
 		return
 	
-	var stretch: int = EmulatorConfig.get_emulator_setting(emulator_id, "video", "stretch_mode", 2)
-	var tex_filter: int = EmulatorConfig.get_emulator_setting(emulator_id, "video", "texture_filter", 0)
+	var stretch_val = EmulatorConfig.get_emulator_setting(emulator_id, "video", "stretch_mode", "Fill")
+	var stretch: int = 2 # default (VideoSize.FILL)
+	
+	if typeof(stretch_val) == TYPE_STRING:
+		match stretch_val:
+			"Small": stretch = 0 # VideoSize.SMALL
+			"Large": stretch = 1 # VideoSize.LARGE
+			"Fill": stretch = 2 # VideoSize.FILL
+			"Proportional": stretch = 3 # VideoSize.PROPORTIONAL
+			_: stretch = 2
+	elif typeof(stretch_val) == TYPE_INT:
+		stretch = stretch_val
+		
+	var tex_filter_val = EmulatorConfig.get_emulator_setting(emulator_id, "video", "texture_filter", "Inherit")
+	var tex_filter: int = 0 # VideoTextureFilter.INHERIT
+	
+	if typeof(tex_filter_val) == TYPE_STRING:
+		match tex_filter_val:
+			"Inherit": tex_filter = 0
+			"Nearest": tex_filter = 1 # fallback
+			"Linear": tex_filter = 2  # fallback smooth
+			"Nearest Mipmap": tex_filter = 1 # VideoTextureFilter.NEAREST_MIPMAP
+			"Linear Mipmap": tex_filter = 2 # VideoTextureFilter.LINEAR_MIPMAP
+			_: tex_filter = 0
+	elif typeof(tex_filter_val) == TYPE_INT:
+		tex_filter = tex_filter_val
 	
 	game_screen.size_mode = stretch
 	game_screen.video_texture_filter = tex_filter

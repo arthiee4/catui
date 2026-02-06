@@ -58,12 +58,41 @@ var console_id_map = {
 	"neo": 9,
 	"pce": 8,
 	"sms": 11,
+	# Disc formats (assuming PS1 as default for chd/iso/bin/cue/pbp if no hint)
+	"chd": 12,
+	"iso": 12,
+	"bin": 12,
+	"cue": 12,
+	"pbp": 12,
+	"cso": 41, # PSP
 	"gg": 15,
 	"a2600": 25,
 	"lynx": 13,
 	"ws": 53,
 	"wsc": 53,
 	"ngp": 14
+}
+
+var core_to_console_map = {
+	"pcsx_rearmed": 12, # PS1
+	"swanstation": 12,
+	"mednafen_psx": 12,
+	"mednafen_psx_hw": 12,
+	"snes9x": 3,
+	"picodrive": 1,
+	"genesis_plus_gx": 1,
+	"fceumm": 7,
+	"nestopia": 7,
+	"gambatte": 4,
+	"mgba": 5,
+	"vbam": 5,
+	"melonds": 18,
+	"desmume": 18,
+	"mupen64plus_next": 2,
+	"parallel_n64": 2,
+	"fbneo": 27,
+	"mame2003_plus": 27,
+	"ppsspp": 41
 }
 
 func _ready():
@@ -184,6 +213,126 @@ func _process_queue():
 	await get_tree().create_timer(request_delay).timeout
 	_process_queue()
 
+func identify_rom_by_hash(rom_path: String) -> Dictionary:
+	if not enabled or not is_configured():
+		print("    ✗ RetroAchievements not configured")
+		return {}
+	
+	# 1. Setup Fallback Params
+	var ext = rom_path.get_extension().to_lower()
+	var rom_name = rom_path.get_file().get_basename()
+	var console_id = _get_console_id(rom_path)
+	var is_disc = ext in ["chd", "iso", "bin", "cue", "pbp", "cso"] # Hints for serial search
+	
+	print("    processing '", rom_name, "'")
+	
+	# A. Try Serial (Disc Only - Highly Accurate)
+	if is_disc:
+		var serial = _extract_serial_from_path(rom_path)
+		if serial != "":
+			# print("    found serial: ", serial)
+			var serial_data = await _lookup_game_by_name(serial, rom_path)
+			if serial_data.get("found", false):
+				serial_data["method"] = "serial"
+				_cache_result(rom_path, serial_data)
+				_handle_auto_download(rom_path, serial_data)
+				return serial_data
+
+	# B. Smart Title Search (For everyone, but smarter)
+	var clean_name = _clean_rom_name(rom_name)
+	print("    searching '", clean_name, "'")
+	
+	var search_data = await _lookup_game_by_name(clean_name, rom_path, console_id)
+	var score = search_data.get("score", 0.0)
+	var min_score = 0.98 # Default strict
+	
+	# Discs are notoriously hard to hash, so we allow slightly fuzzy matches
+	if is_disc: 
+		min_score = 0.90 
+		
+	if search_data.get("found", false) and score >= min_score:
+		print("    found it! (score: ", score, ")")
+		search_data["method"] = "title_strict"
+		_cache_result(rom_path, search_data)
+		_handle_auto_download(rom_path, search_data)
+		return search_data
+	
+	print("    nope, nothing found")
+	return {}
+
+
+func _extract_serial_from_path(path: String) -> String:
+	# Matches patterns like SLUS-01234, SLES_50001, SCPS-45678
+	var regex = RegEx.new()
+	regex.compile("([A-Z]{4}[-_ ]\\d{5})")
+	var result = regex.search(path.to_upper())
+	if result:
+		return result.get_string(1)
+	return ""
+
+func _handle_auto_download(rom_path: String, data: Dictionary):
+	if not auto_download_covers:
+		return
+
+	# Download Cover
+	if data.get("image_boxart", "") != "":
+		var cover_url = BASE_URL + data["image_boxart"]
+		var cover_path = _get_cover_path(rom_path)
+		_queue_download(cover_url, cover_path, rom_path)
+		
+	# Download Icon
+	if data.get("image_icon", "") != "":
+		var icon_url = BASE_URL + data["image_icon"]
+		var icon_path = _get_icon_path(rom_path)
+		_queue_download(icon_url, icon_path, rom_path)
+
+func _lookup_game_by_name(game_name: String, rom_path: String, console_id: int = -1) -> Dictionary:
+	if console_id == -1:
+		console_id = _get_console_id(rom_path)
+	
+	if not games_database.has(console_id):
+		await _fetch_games_list(console_id)
+	
+	var match_result = _find_best_match(game_name, console_id)
+	
+	print("    → Best match: '", match_result.get("title", ""), "' (Score: ", match_result["score"], ")")
+	
+	if match_result["score"] >= min_match_score:
+		# Need full details to include images
+		var url = API_BASE + "/API_GetGame.php?z=" + username + "&y=" + api_key + "&i=" + str(match_result["id"])
+		
+		var request = HTTPRequest.new()
+		add_child(request)
+		request.request(url)
+		var result = await request.request_completed
+		request.queue_free()
+		
+		if result[1] == 200:
+			var json = JSON.new()
+			if json.parse(result[3].get_string_from_utf8()) == OK:
+				var data = _process_game_data(json.data)
+				data["score"] = match_result["score"]
+				return data
+	
+	return {}
+
+func _process_game_data(game_data: Dictionary) -> Dictionary:
+	return {
+		"id": game_data.get("ID", 0), # Compatibility with old code
+		"game_id": game_data.get("ID", 0),
+		"title": game_data.get("Title", ""),
+		"console_name": game_data.get("ConsoleName", ""),
+		"image_icon": game_data.get("ImageIcon", ""),
+		"image_title": game_data.get("ImageTitle", ""),
+		"image_ingame": game_data.get("ImageIngame", ""),
+		"image_boxart": game_data.get("ImageBoxArt", ""),
+		"publisher": game_data.get("Publisher", ""),
+		"developer": game_data.get("Developer", ""),
+		"genre": game_data.get("Genre", ""),
+		"released": game_data.get("Released", ""),
+		"found": true
+	}
+
 func _lookup_game(rom_path: String, console_hint: String):
 	var game_name = _clean_rom_name(rom_path.get_file().get_basename())
 	var console_id = _get_console_id(rom_path, console_hint)
@@ -209,8 +358,11 @@ func _lookup_game(rom_path: String, console_hint: String):
 func _fetch_games_list(console_id: int):
 	var url = API_BASE + "/API_GetGameList.php?z=" + username + "&y=" + api_key + "&i=" + str(console_id) + "&h=0&f=0"
 	
-	http_request.request(url)
-	var result = await http_request.request_completed
+	var request = HTTPRequest.new()
+	add_child(request)
+	request.request(url)
+	var result = await request.request_completed
+	request.queue_free()
 	
 	if result[1] != 200:
 		return
@@ -243,8 +395,11 @@ func _fetch_games_list(console_id: int):
 func _fetch_game_details(game_id: int, rom_path: String):
 	var url = API_BASE + "/API_GetGame.php?z=" + username + "&y=" + api_key + "&i=" + str(game_id)
 	
-	http_request.request(url)
-	var result = await http_request.request_completed
+	var request = HTTPRequest.new()
+	add_child(request)
+	request.request(url)
+	var result = await request.request_completed
+	request.queue_free()
 	
 	if result[1] != 200:
 		return
@@ -369,11 +524,14 @@ func _clean_rom_name(rom_name: String) -> String:
 	var patterns = [
 		"\\([^)]*\\)",
 		"\\[[^\\]]*\\]",
-		"\\s*-\\s*",
 		"\\s+v\\d+\\.?\\d*",
 		"\\s+rev\\s*\\d*",
 		"\\s*\\(.*?\\)\\s*"
 	]
+	
+	# Replace dashes with space first
+	cleaned = cleaned.replace(" - ", " ")
+	cleaned = cleaned.replace("-", " ")
 	
 	var regex = RegEx.new()
 	for pattern in patterns:
@@ -403,11 +561,13 @@ func _normalize_title(title: String) -> String:
 	
 	return normalized.strip_edges()
 
-func _get_console_id(rom_path: String, console_hint: String) -> int:
+func _get_console_id(rom_path: String, console_hint: String = "") -> int:
 	if not console_hint.is_empty():
 		var hint_lower = console_hint.to_lower()
 		if console_id_map.has(hint_lower):
 			return console_id_map[hint_lower]
+		if hint_lower.is_valid_int():
+			return hint_lower.to_int()
 	
 	var extension = rom_path.get_extension().to_lower()
 	
@@ -463,32 +623,58 @@ func _calculate_similarity(string1: String, string2: String) -> float:
 	if string1.is_empty() or string2.is_empty():
 		return 0.0
 	
-	var words1 = string1.split(" ", false)
-	var words2 = string2.split(" ", false)
+	# Tokenize and unique
+	var words1 = _get_unique_words(string1)
+	var words2 = _get_unique_words(string2)
 	
-	var matches = 0.0
-	var total_weight = 0.0
+	# Calculate Intersection
+	var intersection_count = 0.0
 	
-	for word in words1:
-		var weight = 1.0 + word.length() * 0.1
-		total_weight += weight
+	# Create a copy of words2 to track usage (avoid matching same word twice)
+	var available_words2 = words2.duplicate()
+	
+	for w1 in words1:
+		var best_match_idx = -1
+		var best_match_score = 0.0
 		
-		if word.length() < 2:
-			continue
+		for i in range(available_words2.size()):
+			var w2 = available_words2[i]
+			var score = 0.0
+			
+			if w1 == w2:
+				score = 1.0
+			elif w1.length() > 3 and w2.length() > 3:
+				# Levenshtein distance or inclusion for minor typos
+				if w1 in w2 or w2 in w1:
+					score = 0.8
+				# Handle plurals lightly
+				elif w1 + "s" == w2 or w2 + "s" == w1:
+					score = 0.95
+					
+			if score > best_match_score:
+				best_match_score = score
+				best_match_idx = i
 		
-		for other_word in words2:
-			if word == other_word:
-				matches += weight * 2.0
-				break
-			elif word.length() >= 3 and other_word.length() >= 3:
-				if word in other_word or other_word in word:
-					matches += weight
-					break
+		if best_match_idx != -1:
+			intersection_count += best_match_score
+			available_words2.remove_at(best_match_idx)
+			
+	# Jaccard Index = Intersection / Union
+	# Union = Size1 + Size2 - Intersection
+	var union_count = words1.size() + words2.size() - intersection_count
 	
-	if total_weight == 0:
-		return 0.0
+	if union_count == 0: return 0.0
 	
-	return clamp(matches / (total_weight * 2.5), 0.0, 1.0)
+	return intersection_count / union_count
+
+func _get_unique_words(text: String) -> Array:
+	var words = text.to_lower().replace("&", "and").replace("+", " ").split(" ", false)
+	var unique = []
+	for w in words:
+		if w.length() < 2 and w != "3" and w != "2" and w != "i" and w != "v": continue # Skip small junk unless numbers
+		if not w in unique:
+			unique.append(w)
+	return unique
 
 func scan_emulator_rooms(emulator_node: Control):
 	if not emulator_node:
@@ -500,6 +686,11 @@ func scan_emulator_rooms(emulator_node: Control):
 	var folder = emulator_node.rooms_folder
 	var extensions = emulator_node.roms_extensions if "roms_extensions" in emulator_node else []
 	var console_hint = extensions[0] if not extensions.is_empty() else ""
+	
+	if emulator_node.has_meta("core_id"):
+		var core_id = emulator_node.get_meta("core_id")
+		if core_to_console_map.has(core_id):
+			console_hint = str(core_to_console_map[core_id])
 	
 	if folder.is_empty():
 		return
@@ -525,7 +716,40 @@ func scan_emulator_rooms(emulator_node: Control):
 	
 	dir.list_dir_end()
 	
-	queue_multiple_roms(rom_paths, console_hint)
+	scan_roms_by_hash(rom_paths)
+
+func scan_roms_by_hash(rom_paths: Array):
+	print("=== ROM Hash Scan Started ===")
+	print("scanning ", rom_paths.size(), " roms...")
+	
+	lookup_total = rom_paths.size()
+	lookup_count = 0
+	
+	for rom_path in rom_paths:
+		lookup_count += 1
+		queue_progress.emit(lookup_count, lookup_total)
+		
+		print("\n[", lookup_count, "/", lookup_total, "] Processing: ", rom_path.get_file())
+		
+		if has_cached_data(rom_path):
+			print("  ✓ Already cached, skipping")
+			continue
+		
+		# print("  calculando...")
+		var game_data = await identify_rom_by_hash(rom_path)
+		
+		if game_data.get("found", false):
+			print("  + ", game_data.get("title", "Unknown"))
+			# print("  capa: ", game_data.get("image_boxart", "None"))
+			_cache_result(rom_path, game_data)
+			game_data_loaded.emit(rom_path, game_data)
+		else:
+			print("  - not found on RA")
+		
+		await get_tree().create_timer(request_delay).timeout
+	
+	print("\n=== ROM Hash Scan Complete ===")
+	queue_finished.emit()
 
 func clear_cache():
 	cache.clear()
@@ -538,3 +762,24 @@ func get_stats() -> Dictionary:
 		"active_downloads": active_downloads,
 		"is_processing": is_processing_queue
 	}
+
+func _get_cover_path(rom_path: String) -> String:
+	var rom_name = rom_path.get_file().get_basename()
+	var safe_name = rom_name.replace(" ", "_").replace("(", "").replace(")", "")
+	return COVERS_FOLDER + "/" + safe_name + "_cover.png"
+
+func _get_icon_path(rom_path: String) -> String:
+	var rom_name = rom_path.get_file().get_basename()
+	var safe_name = rom_name.replace(" ", "_").replace("(", "").replace(")", "")
+	return ICONS_FOLDER + "/" + safe_name + "_icon.png"
+
+func _queue_download(url: String, local_path: String, rom_path: String):
+	download_queue.append({
+		"type": "cover",
+		"url": url,
+		"local_path": local_path,
+		"rom_path": rom_path
+	})
+	
+	if not is_processing_queue:
+		_process_queue()

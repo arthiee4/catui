@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://b1b23vparqf1j"]
+[gd_scene format=3 uid="uid://b1b23vparqf1j"]
 
 [ext_resource type="Texture2D" uid="uid://8ggsdr4od171" path="res://assets/images/catui/logoDEV.png" id="1_4oyc5"]
 [ext_resource type="Texture2D" uid="uid://dlwafg3vluv1o" path="res://assets/images/props/h3.png" id="1_k6u5k"]
@@ -17,7 +17,7 @@ corner_radius_bottom_left = 25
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xniwu"]
 bg_color = Color(0.19607843, 0.5411765, 0.19607843, 1)
 
-[node name="game_screen" type="Control" node_paths=PackedStringArray("game_load", "video", "audio")]
+[node name="game_screen" type="Control" unique_id=101252079 node_paths=PackedStringArray("game_load", "video", "audio")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,7 +30,7 @@ video = NodePath("video")
 audio = NodePath("AudioStreamPlayer")
 size_mode = 1
 
-[node name="style" type="Control" parent="."]
+[node name="style" type="Control" parent="." unique_id=1409553094]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -38,7 +38,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="style"]
+[node name="Panel" type="Panel" parent="style" unique_id=212851888]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,7 +47,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_5gy4n")
 
-[node name="TextureRect" type="TextureRect" parent="style"]
+[node name="TextureRect" type="TextureRect" parent="style" unique_id=1490357896]
 modulate = Color(1, 1, 1, 0.6039216)
 layout_mode = 1
 anchors_preset = 15
@@ -59,7 +59,7 @@ texture = ExtResource("1_k6u5k")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="video" type="Panel" parent="."]
+[node name="video" type="Panel" parent="." unique_id=442437977]
 clip_children = 1
 custom_minimum_size = Vector2(600, 600)
 layout_mode = 1
@@ -76,7 +76,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_4oyc5")
 
-[node name="TextureRect" type="TextureRect" parent="video"]
+[node name="TextureRect" type="TextureRect" parent="video" unique_id=901437347]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -86,9 +86,9 @@ grow_vertical = 2
 texture = ExtResource("1_4oyc5")
 expand_mode = 1
 
-[node name="Menus" type="Node" parent="."]
+[node name="Menus" type="Node" parent="." unique_id=771332545]
 
-[node name="game_load" type="Control" parent="Menus"]
+[node name="game_load" type="Control" parent="Menus" unique_id=1318372678]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -97,7 +97,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="Menus/game_load"]
+[node name="Panel" type="Panel" parent="Menus/game_load" unique_id=394390955]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -106,7 +106,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_xniwu")
 
-[node name="Label" type="Label" parent="Menus/game_load"]
+[node name="Label" type="Label" parent="Menus/game_load" unique_id=1320197644]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -121,4 +121,4 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "LOADING TEST"
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1534164164]

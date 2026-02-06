@@ -30,6 +30,12 @@ func _setup_connections():
 		retro_achievements.queue_finished.connect(_on_retro_queue_finished)
 	
 	visibility_changed.connect(_on_visibility_changed)
+	
+	# keep library in sync
+	if EmulatorConfig:
+		EmulatorConfig.core_removed.connect(remove_emulator_by_core)
+		EmulatorConfig.core_updated.connect(_on_core_updated)
+		EmulatorConfig.core_added.connect(_on_core_added)
 
 func get_menu_id() -> String:
 	return "library"
@@ -319,7 +325,21 @@ func lookup_rom_metadata(rom_path: String, console_hint: String = ""):
 		game_metadata_updated.emit(rom_path, cached_data)
 		return
 	
-	retro_achievements.queue_rom_lookup(rom_path, console_hint)
+	if not retro_achievements.is_configured():
+		return
+	
+	var game_data = await retro_achievements.identify_rom_by_hash(rom_path)
+	
+	if game_data.get("found", false):
+		metadata_cache[rom_path] = game_data
+		game_metadata_updated.emit(rom_path, game_data)
+	else:
+		var empty_data = {
+			"title": rom_path.get_file().get_basename(),
+			"found": false
+		}
+		metadata_cache[rom_path] = empty_data
+		game_metadata_updated.emit(rom_path, empty_data)
 
 func get_rom_metadata(rom_path: String) -> Dictionary:
 	if retro_achievements and retro_achievements.has_cached_data(rom_path):
@@ -462,3 +482,14 @@ func update_emulator_folder(core_id: String, rooms_folder: String):
 	
 	if not found:
 		DebugCapture.add_log("update_folder: emulator not found for core_id=" + core_id)
+
+func _on_core_updated(core_id: String):
+	if EmulatorConfig:
+		var folder = EmulatorConfig.get_core_rooms_folder(core_id)
+		update_emulator_folder(core_id, folder)
+
+func _on_core_added(core_id: String):
+	if EmulatorConfig:
+		var path = EmulatorConfig.get_libretro_core(core_id)
+		var folder = EmulatorConfig.get_core_rooms_folder(core_id)
+		add_emulator_from_core(core_id, path, folder)
